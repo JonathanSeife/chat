@@ -48,30 +48,33 @@ const Chat = ({ route, navigation }) => {
         }}
       />
     );
-  };
+  }
 
-  return (
-    <View style={styles.container}>
-      <GiftedChat
-        messages={messages}
-        renderBubble={renderBubble}
-        onSend={(messages) => onSend(messages)}
-        user={{
-          _id: 1,
-          name,
-        }}
-      />
-      {Platform.OS === "android" ? (
-        <KeyboardAvoidingView behavior="height" />
-      ) : null}
-    </View>
-  );
-};
-
+  render() {
+    let bgColor = this.props.route.params.bgColor;
+    let name = this.props.route.params.name;
+    this.props.navigation.setOptions({ title: name });
+    return (
+      <View style={[styles.container, { backgroundColor: bgColor }]}>
+        <GiftedChat
+          renderBubble={this.renderBubble.bind(this)}
+          messages={this.state.messages}
+          onSend={(messages) => this.onSend(messages)}
+          user={{
+            _id: this.state.user._id,
+            avatar: "https://placeimg.com/140/140/any",
+            name: name,
+          }}
+        />
+        {Platform.OS === "android" ? (
+          <KeyboardAvoidingView behavior="height" />
+        ) : null}
+      </View>
+    );
+  }
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
 });
-
-export default Chat;
