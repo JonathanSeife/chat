@@ -1,10 +1,27 @@
 import React from "react";
-import { StyleSheet, View, Platform, KeyboardAvoidingView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Platform,
+  Text,
+  KeyboardAvoidingView,
+} from "react-native";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import firebase from "firebase";
+import firestore from "firebase";
 
-const firebase = require("firebase");
-require("firebase/firestore");
+const firebaseConfig = {
+  apiKey: "AIzaSyAPhmtiB3eJNueAZ46vEXihQn5uZqMW4Ro",
+  authDomain: "chat-c71a1.firebaseapp.com",
+  projectId: "chat-c71a1",
+  storageBucket: "chat-c71a1.appspot.com",
+  messagingSenderId: "865233048274",
+  appId: "1:865233048274:web:b971eb3e2387c14ae9d30b",
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 export default class Chat extends React.Component {
   constructor() {
@@ -13,19 +30,6 @@ export default class Chat extends React.Component {
       messages: [],
       user: {},
     };
-    const firebaseConfig = {
-      apiKey: "AIzaSyAPhmtiB3eJNueAZ46vEXihQn5uZqMW4Ro",
-      authDomain: "chat-c71a1.firebaseapp.com",
-      projectId: "chat-c71a1",
-      storageBucket: "chat-c71a1.appspot.com",
-      messagingSenderId: "865233048274",
-      appId: "1:865233048274:web:b971eb3e2387c14ae9d30b",
-    };
-
-    // Initialize Firebase
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
-    (this.referenceChatMessages = firebase), firestore().collection("messages");
   }
   componentDidMount() {
     this.referenceChatMessages = firebase.firestore().collection("messages");
@@ -42,7 +46,6 @@ export default class Chat extends React.Component {
         messages: [],
         user: {
           _id: user.uid,
-          avatar: user.avatar,
           name: this.props.route.params.name,
         },
         loggedInText: "",
@@ -71,7 +74,6 @@ export default class Chat extends React.Component {
         createdAt: data.createdAt.toDate(),
         user: {
           _id: data.user._id,
-          avatar: data.user.avatar || "",
           name: data.user.name,
         },
       });
@@ -122,20 +124,27 @@ export default class Chat extends React.Component {
   }
 
   render() {
-    let bgColor = this.props.route.params.bgColor;
-    let name = this.props.route.params.name;
-    this.props.navigation.setOptions({ title: name });
+    let { name } = this.props.route.params;
+    let { color } = this.props.route.params;
+    let loadTextColor =
+      color === "#090C08" || color === "#474056" ? "#FFFFFF" : "#090C08";
     return (
-      <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <View style={[styles.mainBox, { backgroundColor: color }]}>
+        {this.state.loggedInText !== "" && (
+          <Text style={[styles.loadText, { color: loadTextColor }]}>
+            {this.state.loggedInText}
+          </Text>
+        )}
         <GiftedChat
           renderBubble={this.renderBubble.bind(this)}
+          renderSystemMessage={this.renderSystemMessage}
           messages={this.state.messages}
           onSend={(messages) => this.onSend(messages)}
           user={{
             _id: this.state.user._id,
-            avatar: "https://placeimg.com/140/140/any",
             name: name,
           }}
+          style={[styles.mainBox, { backgroundColor: color }]}
         />
         {Platform.OS === "android" ? (
           <KeyboardAvoidingView behavior="height" />
@@ -145,7 +154,13 @@ export default class Chat extends React.Component {
   }
 }
 const styles = StyleSheet.create({
-  container: {
+  mainBox: {
     flex: 1,
+  },
+
+  loadText: {
+    textAlign: "center",
+    fontSize: 20,
+    marginTop: 30,
   },
 });

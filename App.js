@@ -1,5 +1,4 @@
 import { LogBox } from "react-native";
-LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
 
 // import the screens
 import Start from "./components/Start";
